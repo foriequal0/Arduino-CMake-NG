@@ -12,22 +12,21 @@ function(_resolve_single_value _value _return_var)
 
     string(REGEX REPLACE "^{(.+)}$" "\\1" value "${_value}") # Get only the value
     string(REPLACE "." "_" value_as_var "${value}")
-    if (DEFINED ${value_as_var}) # Value is a variable (Probably cache)
-        set(${_return_var} "${${value_as_var}}" PARENT_SCOPE)
-    else ()
-        # Get extra arguments
-        list(LENGTH extra_args num_of_extra_args)
-        if (${num_of_extra_args} EQUAL 0) # No extra arguments
-            return() # Link simply not found, it's probably desired
-        elseif (${num_of_extra_args} EQUAL 1)
-            list(GET extra_args 0 board_id)
-        endif ()
 
+    # Get extra arguments
+    list(LENGTH extra_args num_of_extra_args)
+    if (${num_of_extra_args} EQUAL 1)
+        list(GET extra_args 0 board_id)
         # Maybe value is a board property?
         try_get_board_property("${board_id}" "${value}" value_as_board_property)
         if (NOT "${value_as_board_property}" STREQUAL "") # Value is indeed a board property
             set(${_return_var} ${value_as_board_property} PARENT_SCOPE)
+            return()
         endif ()
+    endif ()
+
+    if (DEFINED ${value_as_var}) # Value is a variable (Probably cache)
+        set(${_return_var} "${${value_as_var}}" PARENT_SCOPE)
     endif ()
 
 endfunction()
